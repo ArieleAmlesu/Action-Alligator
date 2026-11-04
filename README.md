@@ -164,4 +164,8 @@ Nelle impostazioni puoi attivare un piccolo post-it, solo sui siti che scegli. F
 
 La logica (ritmo, fame, pianificazione, messaggi) sta in funzioni pure in `src/core/`, separate dalle API del browser, ed è coperta dai test in `tests/`.
 
-L'icona è disegnata in `assets/icon.svg`. Per rigenerare i PNG serve Playwright installato a livello globale: `node scripts/render-icons.mjs`.
+Le illustrazioni originali (icona e alligatore con il mantello) sono in `assets/`. Da lì derivano:
+- le icone in `public/icon/` (16-128 px, con angoli arrotondati trasparenti);
+- le immagini dell'interfaccia in `public/img/`.
+
+Per rigenerarle dopo aver cambiato le illustrazioni (facoltativo): `pip install pillow`, poi `python scripts/genera-immagini.py`.
