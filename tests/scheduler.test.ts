@@ -60,7 +60,7 @@ describe('pianificaGiorno', () => {
         expect(inFinestra(t, imp.orariAttivi)).toBe(true);
         expect(inSilenzio(t, imp)).toBe(false);
       }
-      for (let i = 1; i < piano.length; i++) expect(piano[i] - piano[i - 1]).toBeGreaterThanOrEqual(60 * MINUTO);
+      for (let i = 1; i < piano.length; i++) expect(piano[i]! - piano[i - 1]!).toBeGreaterThanOrEqual(60 * MINUTO);
     }
   });
 

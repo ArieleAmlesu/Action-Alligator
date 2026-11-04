@@ -50,7 +50,7 @@ export function pianificaGiorno(o: OpzioniPiano): number[] {
     let liberi = candidati.filter((c) => scelti.every((s) => Math.abs(s - c) >= distanza));
     if (liberi.length === 0) liberi = candidati.filter((c) => !scelti.includes(c));
     if (liberi.length === 0) break;
-    scelti.push(liberi[Math.floor(casuale() * liberi.length)]);
+    scelti.push(liberi[Math.floor(casuale() * liberi.length)] ?? liberi[0]!);
   }
   return scelti.sort((a, b) => a - b);
 }

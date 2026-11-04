@@ -13,7 +13,7 @@ export const SOGLIA_NON_ANCORA = 3;
 
 export function intervalloPerLivello(livello: number): number {
   const i = Math.max(0, Math.min(LIVELLO_MAX, Math.floor(livello)));
-  return INTERVALLI_GIORNI[i];
+  return INTERVALLI_GIORNI[i] ?? INTERVALLI_GIORNI[LIVELLO_MAX];
 }
 
 export interface NuovaAzioneInput {

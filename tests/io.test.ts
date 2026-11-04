@@ -23,7 +23,7 @@ describe('esporta / importa', () => {
     expect(importa('non json')).toEqual({ ok: false, errore: 'Il file non è un JSON valido.' });
     expect(importa('{"app":"altro"}').ok).toBe(false);
     const rotto = esporta(dati, 1) as unknown as { azioni: Record<string, unknown>[] };
-    rotto.azioni[0].stato = 'boh';
+    rotto.azioni[0]!.stato = 'boh';
     const r = importa(JSON.stringify(rotto));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errore).toContain('Azione n. 1');

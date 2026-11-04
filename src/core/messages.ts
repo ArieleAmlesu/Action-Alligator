@@ -90,5 +90,5 @@ export function frasiUtilizzabili(u: Umore, v: Variabili): string[] {
 export function componiMessaggio(u: Umore, v: Variabili, casuale: () => number = Math.random): string {
   const frasi = frasiUtilizzabili(u, v);
   if (frasi.length === 0) return STATO_SENZA_AZIONE[u];
-  return riempi(frasi[Math.floor(casuale() * frasi.length)], v);
+  return riempi(frasi[Math.floor(casuale() * frasi.length)] ?? frasi[0]!, v);
 }

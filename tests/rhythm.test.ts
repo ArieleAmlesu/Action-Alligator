@@ -133,7 +133,7 @@ describe('massimo 3 attive', () => {
 
   it('riattivare un\'azione già attiva non conta doppio', () => {
     const attive = [azione(), azione(), azione()];
-    expect(attiva(attive[0], attive, ADESSO).ok).toBe(true);
+    expect(attiva(attive[0]!, attive, ADESSO).ok).toBe(true);
   });
 });
 

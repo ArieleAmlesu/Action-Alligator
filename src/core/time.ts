@@ -30,7 +30,7 @@ export function chiaveGiorno(ms: number): string {
 
 /** Mezzanotte locale di una chiave "AAAA-MM-GG". */
 export function daChiaveGiorno(chiave: string): number {
-  const [a, m, g] = chiave.split('-').map(Number);
+  const [a = 1970, m = 1, g = 1] = chiave.split('-').map(Number);
   return new Date(a, m - 1, g).getTime();
 }
 
