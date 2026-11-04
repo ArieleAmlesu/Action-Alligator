@@ -76,9 +76,28 @@ Action Alligator sostituisce la pagina della nuova scheda con **la Tana**. La pr
 
 Per vedere la Tana puoi anche cliccare l'icona dell'alligatore nella barra degli strumenti → **Apri la Tana**.
 
+### Far partire Firefox all'accensione del computer (consigliato)
+
+L'estensione funziona solo quando Firefox è aperto: con il computer acceso ma Firefox chiuso, i promemoria non arrivano. Per farlo partire da solo quando accendi Windows:
+
+1. Premi insieme i tasti **Windows + R**: si apre la finestra "Esegui".
+2. Scrivi `shell:startup` e premi **Invio**: si apre la cartella "Esecuzione automatica".
+3. Nella cartella, fai clic col tasto destro su uno spazio vuoto → **Nuovo** → **Collegamento**.
+4. Nel campo del percorso incolla (virgolette comprese):
+   ```
+   "C:\Program Files\Mozilla Firefox\firefox.exe"
+   ```
+   Poi clicca **Avanti**, scrivi `Firefox` come nome e clicca **Fine**.
+
+Dal prossimo avvio di Windows, Firefox si apre da solo.
+
+Se il percorso non funziona, puoi copiare nella cartella l'icona di Firefox che hai sul desktop: tasto destro sull'icona → **Copia**, poi nella cartella tasto destro → **Incolla**.
+
+Per toglierlo, cancella il collegamento da quella cartella.
+
 ## 5. Aggiornamenti
 
-1. **Esporta i tuoi dati**: icona dell'alligatore → Apri la Tana → **Impostazioni** → **Esporta JSON**. Conserva il file.
+1. **Esporta i tuoi dati**: Tana → **Impostazioni** → **Esporta JSON**. Conserva il file.
 2. Nel Prompt dei comandi, dentro la cartella del progetto:
    ```
    git pull
@@ -127,10 +146,17 @@ Gli stati sono: **Sazio** (0-2), **Vigile** (3-5), **Affamato** (6-8) e **Feroce
 
 ### Promemoria
 
-- Arrivano a orari casuali **dentro gli orari attivi**.
+- **Appuntamento fisso alle 18:00** (modificabile o disattivabile nelle impostazioni). Ogni giorno a quell'ora arriva l'azione del giorno.
+  - Se a quell'ora il computer è spento, o non lo stai usando, arriva **appena torni**, entro 4 ore e mai il giorno dopo.
+  - Conta come uno dei promemoria del giorno.
+- Gli altri promemoria arrivano a orari casuali **dentro gli orari attivi**, lontani dall'appuntamento.
 - Non arrivano mai nelle finestre di silenzio, né durante il **Silenzio** (45 minuti, dal popup, senza penalità), né se non stai usando il computer.
 - Le notifiche di Firefox non hanno pulsanti: **clicca la notifica** e si apre la Tana con l'azione evidenziata.
 - Una notifica chiusa, o non cliccata entro 30 minuti, conta come ignorata.
+
+### Copia dei dati
+
+Se passano 2 settimane senza che tu abbia salvato una copia, la Tana te lo ricorda con un riquadro: **Salva una copia adesso** oppure **Più tardi** (te lo ripropone dopo 3 giorni).
 
 ### Post-it (facoltativo, spento di default)
 

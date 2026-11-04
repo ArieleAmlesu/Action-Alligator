@@ -1,10 +1,11 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
-import { esporta, importa, type Dati } from '../../core/io';
+import { importa, type Dati } from '../../core/io';
 import { normalizzaSito } from '../../core/sites';
 import { minutiDaOrario, orarioValido } from '../../core/time';
 import type { Finestra, Impostazioni as TipoImpostazioni } from '../../core/types';
 import { salvaImpostazioni, sostituisciTuttiIDati } from '../../lib/operazioni';
 import { chiediPermessoSito, haPermessoSito, revocaPermessoSito } from '../../lib/postit';
+import { scaricaBackup } from '../../lib/backup';
 import { leggiDati } from '../../lib/storage';
 import { useDati } from '../../ui/useDati';
 
@@ -22,7 +23,7 @@ export function Impostazioni() {
       </p>
       <Orari impostazioni={dati.impostazioni} />
       <PostIt impostazioni={dati.impostazioni} />
-      <DatiSezione />
+      <DatiSezione ultimoBackup={dati.stato.ultimoBackup} />
     </main>
   );
 }
@@ -40,6 +41,7 @@ function Orari({ impostazioni }: { impostazioni: TipoImpostazioni }) {
   if (tutti.some((f) => !orarioValido(f.da) || !orarioValido(f.a))) errori.push('Completa tutti gli orari.');
   else if (minutiDaOrario(bozza.orariAttivi.da) >= minutiDaOrario(bozza.orariAttivi.a))
     errori.push("Gli orari attivi devono finire dopo l'inizio (stesso giorno).");
+  if (bozza.appuntamento.attivo && !orarioValido(bozza.appuntamento.ora)) errori.push("Scegli l'ora dell'appuntamento.");
   if (!orarioValido(bozza.orariFaccioAlle.stasera) || !orarioValido(bozza.orariFaccioAlle.domani))
     errori.push('Completa gli orari di "La faccio alle…".');
 
@@ -57,6 +59,35 @@ function Orari({ impostazioni }: { impostazioni: TipoImpostazioni }) {
   return (
     <form className="scheda" onSubmit={salva} aria-labelledby={`${id}-titolo`}>
       <h2 id={`${id}-titolo`}>Quando può farsi sentire</h2>
+
+      <fieldset style={{ border: 'none', padding: 0, margin: '0 0 16px' }}>
+        <legend style={{ fontWeight: 600, marginBottom: 6 }}>Appuntamento fisso</legend>
+        <p className="muto piccolo">
+          Ogni giorno a quest'ora ti ricorda l'azione del giorno. Se a quell'ora il computer è spento o non ci sei, arriva
+          appena torni (entro 4 ore). Conta come uno dei promemoria del giorno.
+        </p>
+        <div className="riga">
+          <label className="riga" style={{ fontWeight: 400, margin: 0 }}>
+            <input
+              type="checkbox"
+              checked={bozza.appuntamento.attivo}
+              onChange={(e) => setBozza({ ...bozza, appuntamento: { ...bozza.appuntamento, attivo: e.target.checked } })}
+            />
+            Attivo, ogni giorno alle
+          </label>
+          <label htmlFor={`${id}-app`} className="sr-only">
+            Ora dell'appuntamento
+          </label>
+          <input
+            id={`${id}-app`}
+            type="time"
+            value={bozza.appuntamento.ora}
+            disabled={!bozza.appuntamento.attivo}
+            onChange={(e) => setBozza({ ...bozza, appuntamento: { ...bozza.appuntamento, ora: e.target.value } })}
+            required={bozza.appuntamento.attivo}
+          />
+        </div>
+      </fieldset>
 
       <fieldset style={{ border: 'none', padding: 0, margin: '0 0 16px' }}>
         <legend style={{ fontWeight: 600, marginBottom: 6 }}>Orari attivi</legend>
@@ -273,22 +304,15 @@ function PostIt({ impostazioni }: { impostazioni: TipoImpostazioni }) {
   );
 }
 
-function DatiSezione() {
+function DatiSezione({ ultimoBackup }: { ultimoBackup?: number }) {
   const id = useId();
   const [esito, setEsito] = useState('');
   const [inArrivo, setInArrivo] = useState<Dati | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function esportaFile() {
-    const dati = await leggiDati();
-    const json = JSON.stringify(esporta(dati, Date.now()), null, 2);
-    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `action-alligator-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
-    setEsito('Export pronto: controlla i download.');
+    await scaricaBackup();
+    setEsito('Copia salvata: controlla i download.');
   }
 
   async function scegliFile(file: File | undefined) {
@@ -313,7 +337,14 @@ function DatiSezione() {
   return (
     <section className="scheda" aria-labelledby={`${id}-titolo`}>
       <h2 id={`${id}-titolo`}>I tuoi dati</h2>
-      <p className="muto piccolo">Esporta prima di ogni aggiornamento dell'estensione, così hai sempre una copia.</p>
+      <p className="muto piccolo">
+        Esporta prima di ogni aggiornamento dell'estensione, così hai sempre una copia. Se passano 2 settimane senza una
+        copia, la Tana te lo ricorda.
+      </p>
+      <p className="piccolo">
+        Ultima copia:{' '}
+        <strong>{ultimoBackup ? new Date(ultimoBackup).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : 'mai'}</strong>
+      </p>
       <div className="riga">
         <button type="button" onClick={() => void esportaFile()}>
           Esporta JSON

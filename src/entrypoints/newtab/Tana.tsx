@@ -5,7 +5,7 @@ import type { Dati } from '../../core/io';
 import { componiMessaggio, STATO_SENZA_AZIONE } from '../../core/messages';
 import { inScadenza, SOGLIA_NON_ANCORA, type SceltaFaccioAlle } from '../../core/rhythm';
 import { scegliAzioneDaRicordare } from '../../core/scheduler';
-import { numeriSettimana, proponiRevisione } from '../../core/stats';
+import { numeriSettimana, proponiRevisione, serveBackup } from '../../core/stats';
 import type { Azione, Fonte } from '../../core/types';
 import {
   attivaAzione,
@@ -18,6 +18,7 @@ import {
   segnaRevisioneFatta,
   terminaSilenzio,
 } from '../../lib/operazioni';
+import { rimandaBackup, scaricaBackup } from '../../lib/backup';
 import { AggiuntaVeloce } from '../../ui/AggiuntaVeloce';
 import { ModificaAzione, ScegliQualeChiudere, type CampoDaModificare } from '../../ui/Dialoghi';
 import { formattaOra, formattaQuando, minutiRimasti } from '../../ui/format';
@@ -193,6 +194,8 @@ function VistaTana({
       ))}
 
       {proponiRevisione(dati.stato, adesso) && <Revisione dati={dati} onAttiva={onAttiva} />}
+
+      {serveBackup(dati.stato, dati.azioni, adesso) && <PromemoriaBackup ultimo={dati.stato.ultimoBackup} />}
 
       <section aria-labelledby="titolo-attive">
         <h2 id="titolo-attive">Le tue azioni ({attive.length}/3)</h2>
@@ -560,5 +563,27 @@ function VistaPancia({ dati }: { dati: Dati }) {
         </ul>
       </section>
     </>
+  );
+}
+
+function PromemoriaBackup({ ultimo }: { ultimo?: number }) {
+  return (
+    <section className="scheda" aria-labelledby="titolo-backup">
+      <h2 id="titolo-backup">Salva una copia dei tuoi dati</h2>
+      <p className="muto">
+        {ultimo
+          ? `L'ultima copia è del ${new Date(ultimo).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}.`
+          : 'Non hai ancora salvato nessuna copia.'}{' '}
+        I dati stanno solo in questo Firefox: con una copia non li perdi se cambi computer o reinstalli.
+      </p>
+      <div className="riga">
+        <button type="button" className="primario" onClick={() => void scaricaBackup()}>
+          Salva una copia adesso
+        </button>
+        <button type="button" onClick={() => void rimandaBackup()}>
+          Più tardi
+        </button>
+      </div>
+    </section>
   );
 }
