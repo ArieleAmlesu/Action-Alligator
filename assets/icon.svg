@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="#1e5e3a"/>
+  <!-- mascella inferiore -->
+  <path d="M16 80 L104 76 C114 76 114 90 102 92 L34 100 C22 101 16 93 16 80 Z" fill="#8bc34a"/>
+  <!-- denti -->
+  <path d="M56 74 L62 74 L59 82 Z M70 73 L76 73 L73 81 Z M84 72 L90 72 L87 80 Z M98 71 L103 71 L100.5 78 Z" fill="#ffffff"/>
+  <!-- testa e muso -->
+  <path d="M16 76 C14 54 26 40 40 40 C46 26 66 26 70 42 L106 52 C118 56 118 70 106 71 L16 76 Z" fill="#4caf50"/>
+  <!-- squame sul dorso -->
+  <path d="M74 44 L80 36 L84 46 Z M88 48 L94 40 L98 50 Z" fill="#4caf50"/>
+  <!-- occhio -->
+  <circle cx="52" cy="40" r="10" fill="#ffffff"/>
+  <circle cx="55" cy="40" r="5" fill="#13261a"/>
+  <!-- narice -->
+  <ellipse cx="106" cy="58" rx="3.5" ry="2.5" fill="#1e5e3a"/>
+</svg>

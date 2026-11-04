@@ -1,0 +1,8 @@
+node_modules
+.output
+.wxt
+.env*
+coverage
+*.log
+web-ext-artifacts
+scripts/out
