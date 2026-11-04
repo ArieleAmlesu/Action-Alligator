@@ -32,6 +32,13 @@ export default defineConfig({
       ? { content_security_policy: { extension_pages: STRICT_CSP } }
       : {}),
   }),
+  vite: () => ({
+    build: {
+      // Il polyfill di modulepreload usa fetch(): non serve (Firefox lo supporta
+      // da solo) e così nel pacchetto non resta nessuna chiamata fetch.
+      modulePreload: { polyfill: false },
+    },
+  }),
   zip: {
     excludeSources: ['.env*', 'coverage/**', 'scripts/out/**'],
   },
