@@ -9,7 +9,11 @@ export function Dialogo({ aperto, onChiudi, titolo, children }: { aperto: boolea
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (aperto && !d.open) d.showModal();
+    if (aperto && !d.open) {
+      d.showModal();
+      // showModal sposta il focus sul primo campo: lo riportiamo su quello giusto.
+      d.querySelector<HTMLElement>('[data-autofocus]')?.focus();
+    }
     if (!aperto && d.open) d.close();
   }, [aperto]);
   return (
@@ -51,11 +55,11 @@ function FormModifica({ azione, focus, onChiudi }: { azione: Azione; focus: Camp
       {focus === 'quando' && <p className="muto">Forse il momento non era quello giusto. Quando ti viene naturale farla?</p>}
       <div className="campo">
         <label htmlFor={`${id}-q`}>Quando…</label>
-        <input id={`${id}-q`} value={quando} onChange={(e) => setQuando(e.target.value)} required autoFocus={focus === 'quando'} />
+        <input id={`${id}-q`} value={quando} onChange={(e) => setQuando(e.target.value)} required data-autofocus={focus === 'quando' ? '' : undefined} />
       </div>
       <div className="campo">
         <label htmlFor={`${id}-f`}>…farò</label>
-        <input id={`${id}-f`} value={faro} onChange={(e) => setFaro(e.target.value)} required autoFocus={focus === 'faro'} />
+        <input id={`${id}-f`} value={faro} onChange={(e) => setFaro(e.target.value)} required data-autofocus={focus === 'faro' ? '' : undefined} />
       </div>
       <div className="campo">
         <label htmlFor={`${id}-v`}>Versione da 2 minuti</label>
@@ -64,7 +68,7 @@ function FormModifica({ azione, focus, onChiudi }: { azione: Azione; focus: Camp
           value={versione2min}
           onChange={(e) => setVersione2min(e.target.value)}
           required
-          autoFocus={focus === 'versione2min'}
+          data-autofocus={focus === 'versione2min' ? '' : undefined}
         />
       </div>
       <div className="campo">

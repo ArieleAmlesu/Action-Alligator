@@ -200,8 +200,10 @@ textarea {
 input[type='time'] {
   width: auto;
 }
-input[type='checkbox'] {
+input[type='checkbox'],
+input[type='radio'] {
   width: auto;
+  margin: 0;
 }
 
 .campo {
@@ -232,7 +234,8 @@ input[type='checkbox'] {
 }
 
 .messaggio-stato {
-  min-height: 1.5em;
+  min-height: 1.2em;
+  margin: 4px 0 0;
 }
 
 ul.pulita {

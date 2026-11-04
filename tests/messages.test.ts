@@ -43,6 +43,6 @@ describe('messaggi', () => {
 
   it('riempie le variabili', () => {
     const m = componiMessaggio('affamato', { azione: 'Meditare', giorni: 4, volte: 0 }, () => 0);
-    expect(m).toBe('4 giorni a digiuno. Meditare è ancora lì che aspetta.');
+    expect(m).toBe('4 giorni a digiuno. «Meditare» è ancora lì che aspetta.');
   });
 });

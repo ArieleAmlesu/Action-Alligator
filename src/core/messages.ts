@@ -2,7 +2,7 @@
 // niente insulti, niente vergogna. Anche il feroce propone sempre una via d'uscita.
 //
 // Variabili:
-//   {azione}  il testo di "farò" dell'azione
+//   {azione}  il testo di "farò" dell'azione (inserito tra «»)
 //   {giorni}  giorni di calendario dall'ultima Fatta
 //   {volte}   per "sazio": azioni fatte questa settimana;
 //             per gli altri stati: quante volte di fila l'azione è stata rimandata
@@ -73,7 +73,7 @@ export const STATO_SENZA_AZIONE: Record<Umore, string> = {
 
 export function riempi(testo: string, v: Variabili): string {
   return testo
-    .replaceAll('{azione}', v.azione)
+    .replaceAll('{azione}', `«${v.azione}»`)
     .replaceAll('{giorni}', String(v.giorni))
     .replaceAll('{volte}', String(v.volte));
 }
