@@ -111,7 +111,10 @@ function leggiImpostazioni(x: unknown): Impostazioni {
   richiedi(isObj(postit) && typeof postit.attivo === 'boolean' && Array.isArray(postit.siti) && postit.siti.every(isStr), 'Impostazioni: post-it non valido');
   const fa = isObj(x.orariFaccioAlle) ? x.orariFaccioAlle : IMPOSTAZIONI_PREDEFINITE.orariFaccioAlle;
   richiedi(isStr(fa.stasera) && orarioValido(fa.stasera) && isStr(fa.domani) && orarioValido(fa.domani), 'Impostazioni: orari di "La faccio alle..." non validi');
+  const app = isObj(x.appuntamento) ? x.appuntamento : IMPOSTAZIONI_PREDEFINITE.appuntamento;
+  richiedi(typeof app.attivo === 'boolean' && isStr(app.ora) && orarioValido(app.ora), 'Impostazioni: appuntamento non valido');
   return {
+    appuntamento: { attivo: app.attivo as boolean, ora: app.ora as string },
     finestreSilenzio: x.finestreSilenzio.map((f, i) => leggiFinestra(f, `Finestra di silenzio n. ${i + 1}`)),
     orariAttivi: leggiFinestra(x.orariAttivi, 'Orari attivi'),
     postit: { attivo: postit.attivo as boolean, siti: [...(postit.siti as string[])] },
@@ -130,6 +133,8 @@ function leggiStato(x: unknown): StatoAlligatore {
   if (isNum(x.silenzioFino)) s.silenzioFino = x.silenzioFino;
   if (isStr(x.ultimoGiornoValutato)) s.ultimoGiornoValutato = x.ultimoGiornoValutato;
   if (isStr(x.revisioneFatta)) s.revisioneFatta = x.revisioneFatta;
+  if (isNum(x.ultimoBackup)) s.ultimoBackup = x.ultimoBackup;
+  if (isNum(x.backupRimandatoFino)) s.backupRimandatoFino = x.backupRimandatoFino;
   return s;
 }
 

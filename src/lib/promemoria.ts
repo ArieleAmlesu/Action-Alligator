@@ -1,10 +1,16 @@
 // Allarmi e notifiche. Qui la logica pura di src/core incontra le API di Firefox.
 
 import { browser } from 'wxt/browser';
-import { annotaScadenzeOggi, applicaEvento, giorniDiDigiuno, maxPromemoriaAlGiorno, umore, valutaGiorniPassati } from '../core/hunger';
+import { annotaScadenzeOggi, applicaEvento, giorniDiDigiuno, umore, valutaGiorniPassati } from '../core/hunger';
 import { componiMessaggio } from '../core/messages';
 import {
+  appuntamentoInSospeso,
+  decidiAppuntamento,
   decidiPromemoriaCasuale,
+  fineRecuperoAppuntamento,
+  orarioAppuntamento,
+  prossimoAppuntamento,
+  quantiCasuali,
   decidiPromemoriaRichiesto,
   orarioPermesso,
   pianificaGiorno,
@@ -16,6 +22,7 @@ import type { Azione, Evento } from '../core/types';
 import { inCoda, leggiDati, leggiInterno, nuovoId, scriviDati, scriviInterno } from './storage';
 
 export const ALLARME_BATTITO = 'battito';
+const ALLARME_APPUNTAMENTO = 'appuntamento';
 const PREFISSO_CASUALE = 'casuale:';
 const PREFISSO_RICHIESTO = 'promemoria:';
 const PREFISSO_IGNORA = 'ignora:';
@@ -46,7 +53,61 @@ export function battito(adesso = Date.now()): Promise<void> {
 
     const i2 = await leggiInterno();
     if (i2.piano?.giorno !== chiaveGiorno(adesso)) await pianificaOggiInterna(adesso, false);
+
+    // Se il computer era spento all'ora dell'appuntamento, recupera adesso.
+    await appuntamentoInterno(adesso);
+    if (!(await browser.alarms.get(ALLARME_APPUNTAMENTO))) await programmaAppuntamento(adesso);
   });
+}
+
+/** Sei tornato al computer: se l'appuntamento ti stava aspettando, arriva ora. */
+export function tornatoAttivo(adesso = Date.now()): Promise<void> {
+  return inCoda(() => appuntamentoInterno(adesso));
+}
+
+async function programmaAppuntamento(adesso: number): Promise<void> {
+  const dati = await leggiDati();
+  const interno = await leggiInterno();
+  const quando = prossimoAppuntamento(adesso, dati.impostazioni, interno.appuntamento);
+  if (quando === undefined) await browser.alarms.clear(ALLARME_APPUNTAMENTO);
+  else await browser.alarms.create(ALLARME_APPUNTAMENTO, { when: quando });
+}
+
+async function appuntamentoInterno(adesso: number): Promise<void> {
+  const dati = await leggiDati();
+  const interno = await leggiInterno();
+  const oggi = chiaveGiorno(adesso);
+  const esito = decidiAppuntamento({
+    adesso,
+    impostazioni: dati.impostazioni,
+    silenzioFino: dati.stato.silenzioFino,
+    statoIdle: await statoIdle(),
+    azioni: dati.azioni,
+    fattoIl: interno.appuntamento,
+  });
+
+  if (esito.invia) {
+    await inviaNotifica(esito.azione, adesso);
+    const i2 = await leggiInterno();
+    const inviate = i2.piano?.giorno === oggi ? i2.piano.inviate : 0;
+    await scriviInterno({ ...i2, appuntamento: oggi, piano: { giorno: oggi, inviate: inviate + 1 } });
+    await programmaAppuntamento(adesso);
+  } else if (esito.motivo === 'niente_da_ricordare') {
+    // Niente in scadenza: per oggi l'appuntamento è chiuso, nessuna notifica.
+    await scriviInterno({ ...interno, appuntamento: oggi });
+    await programmaAppuntamento(adesso);
+  } else if (esito.motivo === 'silenzio') {
+    // Arriva alla fine del silenzio, se è ancora in tempo.
+    const t = prossimoMomentoLibero(adesso, dati.impostazioni, dati.stato.silenzioFino);
+    if (t > adesso && t < fineRecuperoAppuntamento(adesso, dati.impostazioni)) {
+      await browser.alarms.create(ALLARME_APPUNTAMENTO, { when: t });
+    } else {
+      await programmaAppuntamento(adesso);
+    }
+  } else if (esito.motivo !== 'inattivo') {
+    await programmaAppuntamento(adesso);
+  }
+  // 'inattivo': aspettiamo che torni al computer (idle.onStateChanged) o il prossimo battito.
 }
 
 /** Ripianifica i promemoria casuali che restano oggi (es. dopo aver cambiato le impostazioni). */
@@ -63,16 +124,19 @@ async function pianificaOggiInterna(adesso: number, mantieniConteggio: boolean):
   const tutti = await browser.alarms.getAll();
   await Promise.all(tutti.filter((a) => a.name.startsWith(PREFISSO_CASUALE)).map((a) => browser.alarms.clear(a.name)));
 
-  const quanti = Math.max(0, maxPromemoriaAlGiorno(dati.stato.fame) - inviate);
+  // L'appuntamento fisso ancora da fare occupa uno dei promemoria del giorno.
+  const inSospeso = appuntamentoInSospeso(adesso, dati.impostazioni, interno.appuntamento);
   const orari = pianificaGiorno({
     adesso,
     impostazioni: dati.impostazioni,
     silenzioFino: dati.stato.silenzioFino,
-    quanti,
+    quanti: quantiCasuali(dati.stato.fame, inviate, inSospeso),
+    occupati: dati.impostazioni.appuntamento.attivo ? [orarioAppuntamento(adesso, dati.impostazioni)] : [],
   });
   for (const t of orari) await browser.alarms.create(`${PREFISSO_CASUALE}${t}`, { when: t });
 
   await scriviInterno({ ...interno, piano: { giorno: oggi, inviate } });
+  await programmaAppuntamento(adesso);
 }
 
 /** Crea (o sposta) il promemoria chiesto per un'azione: "La faccio alle..." o "Più tardi". */
@@ -95,7 +159,9 @@ async function statoIdle(): Promise<'active' | 'idle' | 'locked'> {
 export function gestisciAllarme(nome: string, adesso = Date.now()): Promise<void> {
   if (nome === ALLARME_BATTITO) return battito(adesso);
   return inCoda(async () => {
-    if (nome.startsWith(PREFISSO_IGNORA)) {
+    if (nome === ALLARME_APPUNTAMENTO) {
+      await appuntamentoInterno(adesso);
+    } else if (nome.startsWith(PREFISSO_IGNORA)) {
       await segnaIgnorataInterna(nome.slice(PREFISSO_IGNORA.length), adesso);
     } else if (nome.startsWith(PREFISSO_CASUALE)) {
       await promemoriaCasuale(adesso);

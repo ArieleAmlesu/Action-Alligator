@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import { aggiungiAzione, fatta, silenzio } from '../src/lib/operazioni';
-import { gestisciAllarme, notificaChiusa, notificaCliccata, ripianificaOggi } from '../src/lib/promemoria';
+import { battito, gestisciAllarme, notificaChiusa, notificaCliccata, ripianificaOggi, tornatoAttivo } from '../src/lib/promemoria';
 import { leggiDati, leggiInterno } from '../src/lib/storage';
 import { d } from './helpers';
 
@@ -23,18 +23,23 @@ async function nuovaAzione() {
   });
 }
 
+let idle: 'active' | 'idle' | 'locked' = 'active';
+
 beforeEach(() => {
   fakeBrowser.reset();
+  idle = 'active';
+  fakeBrowser.idle.queryState = async () => idle;
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(ADESSO);
 });
 
 describe('ciclo di un promemoria', () => {
-  it('pianifica tanti promemoria quanti ne concede la fame (vigile = 2)', async () => {
+  it('pianifica tanti promemoria quanti ne concede la fame (vigile = 2, uno è l\'appuntamento)', async () => {
     await nuovaAzione();
     await ripianificaOggi(ADESSO);
     const casuali = await allarmi('casuale:');
-    expect(casuali).toHaveLength(2);
+    expect(casuali).toHaveLength(1);
+    expect((await fakeBrowser.alarms.get('appuntamento'))?.scheduledTime).toBe(d(2026, 11, 2, 18));
     for (const a of casuali) expect(a.scheduledTime).toBeGreaterThan(ADESSO);
     expect((await leggiInterno()).piano).toEqual({ giorno: '2026-11-02', inviate: 0 });
   });
@@ -113,5 +118,58 @@ describe('ciclo di un promemoria', () => {
     await nuovaAzione();
     await gestisciAllarme('casuale:1', d(2026, 11, 2, 23, 0));
     expect(Object.keys(await fakeBrowser.notifications.getAll())).toHaveLength(0);
+  });
+});
+
+describe('appuntamento delle 18', () => {
+  const notifiche = async () => Object.keys(await fakeBrowser.notifications.getAll()).length;
+
+  it('alle 18 arriva, conta nel tetto e si riprogramma per domani', async () => {
+    await nuovaAzione();
+    await gestisciAllarme('appuntamento', d(2026, 11, 2, 18));
+    expect(await notifiche()).toBe(1);
+    const interno = await leggiInterno();
+    expect(interno.appuntamento).toBe('2026-11-02');
+    expect(interno.piano?.inviate).toBe(1);
+    expect((await fakeBrowser.alarms.get('appuntamento'))?.scheduledTime).toBe(d(2026, 11, 3, 18));
+    // Un secondo tentativo lo stesso giorno non manda niente
+    // (la notifica delle 18, non cliccata da 30 minuti, conta come ignorata).
+    await battito(d(2026, 11, 2, 18, 30));
+    const tipi = (await leggiDati()).eventi.map((e) => e.tipo);
+    expect(tipi.filter((t) => t === 'notifica')).toHaveLength(1);
+    expect(tipi).toContain('ignorata');
+  });
+
+  it('se non sei al computer aspetta, e arriva appena torni', async () => {
+    await nuovaAzione();
+    idle = 'idle';
+    await gestisciAllarme('appuntamento', d(2026, 11, 2, 18));
+    expect(await notifiche()).toBe(0);
+    idle = 'active';
+    await tornatoAttivo(d(2026, 11, 2, 18, 40));
+    expect(await notifiche()).toBe(1);
+  });
+
+  it('computer acceso alle 20: recupera; alle 22:30: lascia perdere', async () => {
+    await nuovaAzione();
+    await battito(d(2026, 11, 2, 20));
+    expect(await notifiche()).toBe(1);
+
+    fakeBrowser.reset();
+    fakeBrowser.idle.queryState = async () => 'active' as const;
+    await nuovaAzione();
+    await battito(d(2026, 11, 2, 22, 30));
+    expect(await notifiche()).toBe(0);
+  });
+
+  it('durante il Silenzio slitta alla fine', async () => {
+    vi.setSystemTime(d(2026, 11, 2, 17, 50));
+    await nuovaAzione();
+    const fino = await silenzio();
+    await gestisciAllarme('appuntamento', d(2026, 11, 2, 18));
+    expect(await notifiche()).toBe(0);
+    expect((await fakeBrowser.alarms.get('appuntamento'))?.scheduledTime).toBe(fino);
+    await gestisciAllarme('appuntamento', fino);
+    expect(await notifiche()).toBe(1);
   });
 });

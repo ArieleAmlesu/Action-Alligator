@@ -9,6 +9,7 @@ import {
   notificaChiusa,
   notificaCliccata,
   ripianificaOggi,
+  tornatoAttivo,
 } from '../lib/promemoria';
 import { sincronizzaPostit } from '../lib/postit';
 import type { Impostazioni } from '../core/types';
@@ -27,6 +28,12 @@ export default defineBackground({
 
     browser.notifications.onClosed.addListener((id, byUser) => {
       void notificaChiusa(id, byUser);
+    });
+
+    // Quando torni al computer, l'appuntamento che ti aspettava arriva subito.
+    browser.idle.setDetectionInterval(60);
+    browser.idle.onStateChanged.addListener((stato) => {
+      if (stato === 'active') void tornatoAttivo();
     });
 
     browser.runtime.onMessage.addListener((msg: unknown) => {

@@ -6,6 +6,8 @@ import { IMPOSTAZIONI_PREDEFINITE, STATO_INIZIALE, type Impostazioni } from '../
 
 /** Dati tecnici del background (non esportati). */
 export interface Interno {
+  /** Giorno (AAAA-MM-GG) in cui l'appuntamento fisso è già stato fatto */
+  appuntamento?: string;
   /** Piano dei promemoria casuali di oggi */
   piano?: { giorno: string; inviate: number };
   /** Notifiche mostrate e non ancora cliccate: id -> azione */

@@ -64,3 +64,26 @@ describe('settimana', () => {
     expect(proponiRevisione(STATO_INIZIALE, d(2026, 11, 9, 10))).toBe(false);
   });
 });
+
+describe('compatibilità e backup', () => {
+  it('un export vecchio, senza appuntamento, prende quello predefinito', async () => {
+    const { esporta, importa } = await import('../src/core/io');
+    const file = esporta({ azioni: [], fonti: [], eventi: [], impostazioni: impostazioni(), stato: STATO_INIZIALE }, 1) as unknown as {
+      impostazioni: Record<string, unknown>;
+    };
+    delete file.impostazioni.appuntamento;
+    const r = importa(JSON.stringify(file));
+    expect(r.ok && r.dati.impostazioni.appuntamento).toEqual({ attivo: true, ora: '18:00' });
+  });
+
+  it('ricorda il backup dopo 14 giorni, mai senza dati, e rispetta il rimando', async () => {
+    const { serveBackup } = await import('../src/core/stats');
+    const a = azione({ creata: d(2026, 11, 1) });
+    expect(serveBackup(STATO_INIZIALE, [], d(2026, 12, 1))).toBe(false);
+    expect(serveBackup(STATO_INIZIALE, [a], d(2026, 11, 14))).toBe(false);
+    expect(serveBackup(STATO_INIZIALE, [a], d(2026, 11, 15))).toBe(true);
+    expect(serveBackup({ ...STATO_INIZIALE, ultimoBackup: d(2026, 11, 10) }, [a], d(2026, 11, 20))).toBe(false);
+    expect(serveBackup({ ...STATO_INIZIALE, ultimoBackup: d(2026, 11, 10) }, [a], d(2026, 11, 24))).toBe(true);
+    expect(serveBackup({ ...STATO_INIZIALE, backupRimandatoFino: d(2026, 11, 18) }, [a], d(2026, 11, 16))).toBe(false);
+  });
+});
