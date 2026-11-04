@@ -1,8 +1,7 @@
 import { browser } from 'wxt/browser';
-import { umore } from '../../core/hunger';
+import { ETICHETTE_UMORE, umore } from '../../core/hunger';
 import { silenzio, terminaSilenzio, MINUTI_SILENZIO } from '../../lib/operazioni';
 import { AggiuntaVeloce } from '../../ui/AggiuntaVeloce';
-import { Alligatore } from '../../ui/Alligatore';
 import { formattaOra, minutiRimasti } from '../../ui/format';
 import { useAdesso, useDati } from '../../ui/useDati';
 
@@ -21,8 +20,11 @@ export function Popup() {
   return (
     <main style={{ width: 360, padding: 14 }}>
       <div className="riga" style={{ marginBottom: 10 }}>
-        <Alligatore umore={umore(dati.stato.fame)} dimensione={40} />
-        <h1 style={{ fontSize: '1.15rem', margin: 0, flex: 1 }}>Action Alligator</h1>
+        <img src="/img/alligatore.webp" alt="" width={40} height={40} style={{ borderRadius: 10 }} />
+        <div style={{ flex: 1 }}>
+          <h1 style={{ fontSize: '1.15rem', margin: 0 }}>Action Alligator</h1>
+          <span className={`umore umore-${umore(dati.stato.fame)}`}>{ETICHETTE_UMORE[umore(dati.stato.fame)]}</span>
+        </div>
         <button type="button" onClick={() => void apriTana()}>
           Apri la Tana
         </button>

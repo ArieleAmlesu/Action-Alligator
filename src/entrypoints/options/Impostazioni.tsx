@@ -13,7 +13,10 @@ export function Impostazioni() {
   if (!dati) return <main className="contenitore" aria-busy="true" />;
   return (
     <main className="contenitore" style={{ maxWidth: 720 }}>
-      <h1>Impostazioni</h1>
+      <div className="riga" style={{ marginBottom: 8 }}>
+        <img src="/img/alligatore.webp" alt="" width={44} height={44} style={{ borderRadius: 12 }} />
+        <h1 style={{ margin: 0 }}>Impostazioni</h1>
+      </div>
       <p className="muto">
         Tutto resta su questo computer, in Firefox. Nessun dato esce dall'estensione.
       </p>
@@ -263,7 +266,7 @@ function PostIt({ impostazioni }: { impostazioni: TipoImpostazioni }) {
           </form>
         </>
       )}
-      <p className="muto piccolo messaggio-stato" role="status" style={{ marginTop: 6 }}>
+      <p className="muto piccolo messaggio-stato" role="status">
         {esito}
       </p>
     </section>
@@ -348,7 +351,7 @@ function DatiSezione() {
           </div>
         </div>
       )}
-      <p className="muto piccolo messaggio-stato" role="status" style={{ marginTop: 6 }}>
+      <p className="muto piccolo messaggio-stato" role="status">
         {esito}
       </p>
     </section>

@@ -19,7 +19,6 @@ import {
   terminaSilenzio,
 } from '../../lib/operazioni';
 import { AggiuntaVeloce } from '../../ui/AggiuntaVeloce';
-import { Alligatore } from '../../ui/Alligatore';
 import { ModificaAzione, ScegliQualeChiudere, type CampoDaModificare } from '../../ui/Dialoghi';
 import { formattaOra, formattaQuando, minutiRimasti } from '../../ui/format';
 import { useAdesso, useDati } from '../../ui/useDati';
@@ -108,14 +107,29 @@ function Intestazione({ dati, adesso, vista }: { dati: Dati; adesso: number; vis
   const silenzioFino = dati.stato.silenzioFino && dati.stato.silenzioFino > adesso ? dati.stato.silenzioFino : undefined;
 
   return (
-    <header className="scheda" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-      <Alligatore umore={u} dimensione={96} />
-      <div style={{ flex: 1, minWidth: 220 }}>
+    <header className="eroe">
+      <div className="eroe-testo">
+        <div className="riga" style={{ justifyContent: 'space-between' }}>
+          <span className="eroe-marchio">
+            <img src="/img/alligatore.webp" alt="" width={28} height={28} />
+            Action Alligator
+          </span>
+          <nav aria-label="Sezioni" className="riga">
+            {vista !== 'tana' && (
+              <a className="bottone" href="#">
+                ← Tana
+              </a>
+            )}
+            <button type="button" onClick={() => void browser.runtime.openOptionsPage()}>
+              Impostazioni
+            </button>
+          </nav>
+        </div>
         <h1>La Tana</h1>
-        <p style={{ fontSize: '1.1rem' }}>{frase}</p>
+        <p className="fumetto">{frase}</p>
         <BarraFame fame={dati.stato.fame} umore={u} />
         {silenzioFino && (
-          <p className="piccolo muto" style={{ marginTop: 6 }}>
+          <p className="piccolo" style={{ margin: 0 }}>
             Silenzio fino alle {formattaOra(silenzioFino)} ({minutiRimasti(silenzioFino, adesso)} min).{' '}
             <button type="button" className="collegamento" onClick={() => void terminaSilenzio()}>
               Termina
@@ -123,16 +137,7 @@ function Intestazione({ dati, adesso, vista }: { dati: Dati; adesso: number; vis
           </p>
         )}
       </div>
-      <nav aria-label="Sezioni" className="riga" style={{ alignSelf: 'flex-start' }}>
-        {vista !== 'tana' && (
-          <a className="bottone" href="#">
-            ← Tana
-          </a>
-        )}
-        <button type="button" onClick={() => void browser.runtime.openOptionsPage()}>
-          Impostazioni
-        </button>
-      </nav>
+      <img className="eroe-img" src="/img/eroe.webp" alt="" />
     </header>
   );
 }
@@ -140,9 +145,9 @@ function Intestazione({ dati, adesso, vista }: { dati: Dati; adesso: number; vis
 function BarraFame({ fame, umore: u }: { fame: number; umore: Umore }) {
   return (
     <div>
-      <div className="riga piccolo muto" style={{ justifyContent: 'space-between' }}>
+      <div className="riga piccolo" style={{ justifyContent: 'space-between', marginBottom: 4 }}>
         <span>
-          Umore: <strong>{ETICHETTE_UMORE[u]}</strong>
+          Umore: <span className={`umore umore-${u}`}>{ETICHETTE_UMORE[u]}</span>
         </span>
         <span>Fame {String(fame).replace('.', ',')}/10</span>
       </div>
@@ -192,7 +197,9 @@ function VistaTana({
       <section aria-labelledby="titolo-attive">
         <h2 id="titolo-attive">Le tue azioni ({attive.length}/3)</h2>
         {attive.length === 0 && (
-          <div className="scheda">
+          <div className="scheda vuoto">
+            <img src="/img/alligatore.webp" alt="" width={96} height={96} />
+            <div>
             <h3>Nessuna azione attiva</h3>
             <p>
               Pensa all'ultima cosa che hai letto, visto o imparato. Qual è <strong>una</strong> cosa concreta che puoi fare
@@ -201,6 +208,7 @@ function VistaTana({
             <a className="bottone" href="#aggiungi">
               Aggiungi la prima azione ↓
             </a>
+            </div>
           </div>
         )}
         {attive.map((a) => (
@@ -238,10 +246,10 @@ function VistaTana({
         <h2 id="titolo-settimana">Questa settimana</h2>
         <div className="griglia-2">
           <p>
-            <strong style={{ fontSize: '1.6rem' }}>{settimana.fontiAggiunte}</strong> fonti aggiunte
+            <strong className="numero-grande">{settimana.fontiAggiunte}</strong> fonti aggiunte
           </p>
           <p>
-            <strong style={{ fontSize: '1.6rem' }}>{settimana.azioniFatte}</strong> azioni fatte
+            <strong className="numero-grande">{settimana.azioniFatte}</strong> azioni fatte
           </p>
         </div>
         {settimana.fontiAggiunte > settimana.azioniFatte && (
@@ -390,7 +398,7 @@ function SchedaAzione({
           </button>
         </div>
       )}
-      <p className="muto piccolo messaggio-stato" role="status" style={{ marginTop: 6 }}>
+      <p className="muto piccolo messaggio-stato" role="status">
         {esito}
       </p>
     </article>
