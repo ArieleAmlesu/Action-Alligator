@@ -1,0 +1,476 @@
+/* Palette ispirata alle illustrazioni: cielo turchese-menta, schede crema,
+   verde alligatore, accenti rosso sveglia e giallo scintilla. */
+:root {
+  --cielo-1: #1fb3a1;
+  --cielo-2: #7fdcb6;
+  --sfondo: #f5f3e8;
+  --sfondo-alto: #c9f1df;
+  --superficie: #fffcf3;
+  --superficie-2: #f6efdc;
+  --testo: #17301f;
+  --testo-2: #4f6556;
+  --bordo: #eadfc2;
+  --verde: #1f5d36;
+  --verde-chiaro: #3f9a4a;
+  --verde-acceso: #2c7a3c;
+  --su-verde: #ffffff;
+  --rosso: #d9443a;
+  --oro: #f2b928;
+  --avviso: #7a4d00;
+  --avviso-sfondo: #fff0c7;
+  --pericolo: #b8372d;
+  --evidenza: #ffe07a;
+  --raggio: 18px;
+  --ombra: 0 2px 0 rgba(120, 100, 50, 0.08), 0 8px 24px rgba(23, 70, 50, 0.08);
+  --ombra-bottone: 0 2px 0 rgba(120, 100, 50, 0.18);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cielo-1: #0d5a52;
+    --cielo-2: #0f3f3a;
+    --sfondo: #0b1a18;
+    --sfondo-alto: #0f322d;
+    --superficie: #132a27;
+    --superficie-2: #1b3733;
+    --testo: #eaf6ef;
+    --testo-2: #a9c2b6;
+    --bordo: #24443f;
+    --verde: #8fdca0;
+    --verde-chiaro: #5cc77a;
+    --verde-acceso: #4cb96a;
+    --su-verde: #08200f;
+    --rosso: #ff7a6e;
+    --oro: #ffd25a;
+    --avviso: #ffd27a;
+    --avviso-sfondo: #3a2f12;
+    --pericolo: #ff8a7a;
+    --evidenza: #6b5a12;
+    --ombra: 0 2px 0 rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.3);
+    --ombra-bottone: 0 2px 0 rgba(0, 0, 0, 0.4);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  color: var(--testo);
+  font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background: var(--sfondo) linear-gradient(180deg, var(--sfondo-alto) 0, var(--sfondo) 420px) no-repeat;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+h1 {
+  font-size: 1.8rem;
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-size: 1.15rem;
+}
+h3 {
+  font-size: 1rem;
+}
+
+p {
+  margin: 0 0 0.5rem;
+}
+
+a {
+  color: var(--verde);
+}
+
+:focus-visible {
+  outline: 3px solid var(--oro);
+  outline-offset: 2px;
+}
+
+.contenitore {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.scheda {
+  background: var(--superficie);
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  box-shadow: var(--ombra);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.scheda.evidenziata {
+  outline: 3px solid var(--oro);
+  animation: lampo 1.6s ease-out 1;
+}
+
+@keyframes lampo {
+  0% {
+    box-shadow: 0 0 0 10px var(--evidenza);
+  }
+  100% {
+    box-shadow: var(--ombra);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scheda.evidenziata {
+    animation: none;
+  }
+}
+
+/* --- Intestazione della Tana con l'illustrazione --- */
+.eroe {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  overflow: hidden;
+  border-radius: 24px;
+  margin-bottom: 20px;
+  background: linear-gradient(160deg, var(--cielo-2), var(--cielo-1));
+  box-shadow: var(--ombra);
+  color: #0f2a1b;
+}
+@media (prefers-color-scheme: dark) {
+  .eroe {
+    color: var(--testo);
+  }
+}
+.eroe-testo {
+  padding: 22px 8px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.eroe-marchio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.eroe-marchio img {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.eroe h1 {
+  margin: 0;
+  font-size: 2.1rem;
+}
+.eroe-img {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  max-height: 360px;
+  object-fit: cover;
+  object-position: 50% 30%;
+  display: block;
+}
+.fumetto {
+  position: relative;
+  background: var(--superficie);
+  color: var(--testo);
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 1.08rem;
+  box-shadow: var(--ombra-bottone);
+  margin: 0;
+}
+.fumetto::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  top: 22px;
+  border: 10px solid transparent;
+  border-left-color: var(--superficie);
+  border-right: 0;
+}
+.eroe-nav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+}
+@media (max-width: 640px) {
+  .eroe {
+    grid-template-columns: 1fr;
+  }
+  .eroe-img {
+    order: -1;
+    min-height: 0;
+    height: 220px;
+    object-position: 50% 32%;
+  }
+  .eroe-testo {
+    padding: 16px;
+  }
+  .fumetto::after {
+    display: none;
+  }
+}
+
+.umore {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: #fff;
+}
+.umore-sazio {
+  background: #2c7a3c;
+}
+.umore-vigile {
+  background: #b9860c;
+}
+.umore-affamato {
+  background: #d66a1f;
+}
+.umore-feroce {
+  background: #c23a2f;
+}
+
+.muto {
+  color: var(--testo-2);
+}
+.eroe .muto {
+  color: inherit;
+  opacity: 0.8;
+}
+.piccolo {
+  font-size: 0.85rem;
+}
+
+.riga {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.griglia-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+button,
+.bottone {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 12px;
+  border: 1px solid var(--bordo);
+  background: var(--superficie-2);
+  color: var(--testo);
+  padding: 7px 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--ombra-bottone);
+  transition: transform 0.05s ease;
+}
+button:hover,
+.bottone:hover {
+  border-color: var(--verde-chiaro);
+}
+button:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+button.primario {
+  background: var(--verde-acceso);
+  border-color: var(--verde-acceso);
+  color: var(--su-verde);
+  font-weight: 700;
+}
+button.pericolo {
+  color: var(--pericolo);
+}
+button.collegamento {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--verde);
+  text-decoration: underline;
+  padding: 0;
+}
+.eroe button,
+.eroe .bottone {
+  background: rgba(255, 252, 243, 0.85);
+  color: #17301f;
+  border-color: transparent;
+}
+.eroe button.collegamento {
+  background: none;
+  color: inherit;
+  box-shadow: none;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+.aiuto {
+  font-weight: 400;
+  color: var(--testo-2);
+  font-size: 0.8rem;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--bordo);
+  background: var(--superficie);
+  color: var(--testo);
+}
+input[type='time'] {
+  width: auto;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+  margin: 0;
+  accent-color: var(--verde-acceso);
+}
+
+.campo {
+  margin-bottom: 10px;
+}
+
+.etichetta {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--superficie-2);
+  border: 1px solid var(--bordo);
+  color: var(--testo-2);
+}
+.etichetta.oggi {
+  background: var(--rosso);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.avviso {
+  background: var(--avviso-sfondo);
+  color: var(--avviso);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 8px 0;
+}
+
+.messaggio-stato {
+  margin: 6px 0 0;
+}
+/* Vuoto ma presente: i lettori di schermo annunciano comunque i messaggi. */
+.messaggio-stato:empty {
+  margin: 0;
+}
+
+.numero-grande {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--verde);
+  margin-right: 6px;
+}
+
+ul.pulita {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+ul.pulita > li {
+  padding: 10px 0;
+  border-top: 1px solid var(--bordo);
+}
+ul.pulita > li:first-child {
+  border-top: none;
+}
+
+dialog {
+  border: 1px solid var(--bordo);
+  border-radius: var(--raggio);
+  background: var(--superficie);
+  color: var(--testo);
+  max-width: min(520px, calc(100vw - 32px));
+  width: 100%;
+  padding: 20px;
+}
+dialog::backdrop {
+  background: rgba(8, 40, 35, 0.45);
+}
+
+.fame-barra {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 252, 243, 0.7);
+  overflow: hidden;
+}
+.fame-barra > span {
+  display: block;
+  height: 100%;
+  background: #2c7a3c;
+  border-radius: 999px;
+}
+.fame-barra.vigile > span {
+  background: #d9a514;
+}
+.fame-barra.affamato > span {
+  background: #e07a2a;
+}
+.fame-barra.feroce > span {
+  background: #d9443a;
+}
+
+.vuoto {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.vuoto img {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
